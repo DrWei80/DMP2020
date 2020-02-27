@@ -43,7 +43,7 @@ object logToParquet {
       */
     val line: RDD[Array[String]] =data.map(x=>{x.split(",",x.length)}).filter(_.length>=85)
 
-    //利用反射方式将RDD转换成dataFrame
+    //利用动态编程方式将RDD转换成dataFrame
     //需要传入一个rddRow:RDD[Row]和一个schema:StructType
     val df=spark.sqlContext.createDataFrame(logUtil.rddToRddRowForLog(line),logUtil.logStructType)
     //统计各省市数据量分布情况
