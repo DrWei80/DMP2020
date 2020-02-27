@@ -26,7 +26,7 @@ object logToParquet {
     //设置序列化
     val conf=new SparkConf()
       .setAppName(this.getClass.getName)
-      .setMaster("local[*]").set("spark.serializer","org.apache.spark.serializer.KryoSerializer")
+      .setMaster("local").set("spark.serializer","org.apache.spark.serializer.KryoSerializer")
 
     val spark=SparkSession.builder().config(conf).getOrCreate()
 
@@ -46,12 +46,12 @@ object logToParquet {
     //利用动态编程方式将RDD转换成dataFrame
     //需要传入一个rddRow:RDD[Row]和一个schema:StructType
     val df=spark.sqlContext.createDataFrame(logUtil.rddToRddRowForLog(line),logUtil.logStructType)
-    //统计各省市数据量分布情况
-    val countByArea: DataFrame =df.select("provincename","cityname").groupBy("provincename","cityname").count()
+    df.write.parquet(outputPath)
+
+
     //todo 将统计的结果输出成 json 格式，并输出到磁盘目录。
-    saveAsJsonToLocal(countByArea)
-    //todo 将结果写到到 mysql 数据库
-    saveToMysql(countByArea)
+//    saveAsJsonToLocal(countByArea)
+
 
     spark.stop()
 
@@ -59,17 +59,9 @@ object logToParquet {
 
   //将统计的结果输出成 json 格式，并输出到磁盘目录。
   def saveAsJsonToLocal(countByArea: DataFrame) = {
-    countByArea.repartition(5).write.json("E:/Dr998/DMP2020_localJson")
+    countByArea.repartition(1).write.json("E:/Dr998/DMP2020_localJson")
   }
-  //将结果写到到 mysql 数据库
-  def saveToMysql(countByArea: DataFrame) = {
-    val url = "jdbc:mysql://localhost:3306/test"
-    val tableName = "DMP_countByArea"
-    val properties = new Properties()
-    properties.put("user", "root")
-    properties.put("password", "123456")
-    countByArea.write.mode(SaveMode.Append).jdbc(url, tableName, properties)
-  }
+
 
 
 
