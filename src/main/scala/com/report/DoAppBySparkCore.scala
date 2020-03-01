@@ -1,13 +1,14 @@
 package com.report
 
 
-import com.util.logUtil
+import com.utils.{LogUtils, ReadAppDictionary}
 import org.apache.commons.lang.StringUtils
 import org.apache.spark.SparkConf
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 
 
-object doAppBySparkCore {
+object DoAppBySparkCore {
   def main(args: Array[String]): Unit = {
     //设置hadoop环境变量
     System.setProperty("hadoop.home.dir","D:/hadoop-2.7.7")
@@ -27,17 +28,8 @@ object doAppBySparkCore {
     //配置SQLcontext的压缩方式，其实默认就是snappy
     spark.sqlContext.setConf("spark.sql.parquet.compression.codec","snappy")
 
-    //读取字典文件 取出APP的名字和IP 以KV形式广播
-
-    val dictionaryFile=spark.sparkContext.textFile(dictionaryPath)
-      .map(_.split("\\s+",-1))
-      .filter(_.length>=5)
-      .map(x=>{
-        //其中K是appIP,V是appName
-        (x(4),x(1))
-      })
-      .collectAsMap()
-    val dictionaryBroadcast=spark.sparkContext.broadcast(dictionaryFile)
+    //读取字典文件
+    val dictionaryBroadcast=ReadAppDictionary.broadDictionary(spark,dictionaryPath)
 
     //读取数据
     val df=spark.read.parquet(inputPath)
@@ -49,7 +41,7 @@ object doAppBySparkCore {
       if(StringUtils.isBlank(appName)){
         appName=dictionaryBroadcast.value.getOrElse(x.getAs[String]("appid"),"未知软件")
       }
-      (appName,logUtil.calculateField(x))
+      (appName,LogUtils.calculateField(x))
     })
     //聚合
     filedData.reduceByKey{case(a,b)=>{

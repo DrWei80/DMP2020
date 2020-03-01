@@ -3,7 +3,7 @@ package com.report
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object doDeviceTypeBySparkSQL {
+object DoDeviceTypeBySparkSQL {
   def main(args: Array[String]): Unit = {
     //设置hadoop环境变量
     System.setProperty("hadoop.home.dir","D:/hadoop-2.7.7")

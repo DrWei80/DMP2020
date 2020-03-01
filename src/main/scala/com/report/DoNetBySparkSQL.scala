@@ -3,7 +3,7 @@ package com.report
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object doNetBySparkSQL {
+object DoNetBySparkSQL {
 
 def main(args: Array[String]): Unit = {
   //设置hadoop环境变量

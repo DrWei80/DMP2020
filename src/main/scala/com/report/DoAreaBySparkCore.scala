@@ -1,10 +1,10 @@
 package com.report
 
-import com.util.logUtil
+import com.utils.LogUtils
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object doAreaBySparkCore {
+object DoAreaBySparkCore {
   def main(args: Array[String]): Unit = {
     //设置hadoop环境变量
     System.setProperty("hadoop.home.dir","D:/hadoop-2.7.7")
@@ -34,7 +34,7 @@ object doAreaBySparkCore {
       val provincename=x.getAs[String]("provincename")
       val cityname=x.getAs[String]("cityname")
       //封装数据为一个元组((String,String),List(....))
-      ((provincename,cityname),logUtil.calculateField(x))
+      ((provincename,cityname),LogUtils.calculateField(x))
     })
     filedData.reduceByKey{case (a,b)=>{
       a.zip(b).map(x=>{x._1+x._2})

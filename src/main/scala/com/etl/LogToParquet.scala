@@ -3,12 +3,12 @@ package com.etl
 
 import java.util.Properties
 
-import com.util.logUtil
+import com.utils.LogUtils
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 
-object logToParquet {
+object LogToParquet {
 
 
 
@@ -45,7 +45,7 @@ object logToParquet {
 
     //利用动态编程方式将RDD转换成dataFrame
     //需要传入一个rddRow:RDD[Row]和一个schema:StructType
-    val df=spark.sqlContext.createDataFrame(logUtil.rddToRddRowForLog(line),logUtil.logStructType)
+    val df=spark.sqlContext.createDataFrame(LogUtils.rddToRddRowForLog(line),LogUtils.logStructType)
     df.write.parquet(outputPath)
 
 

@@ -1,6 +1,6 @@
-package com.util
+package com.utils
 
-object typeTransform {
+object TypeTransform {
   //类型转换，如果有空值则捕获异常并且返回值
   def toInt(str:String):Int={
     try{

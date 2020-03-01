@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 
-object logToMySQL {
+object LogToMySQL {
   def main(args: Array[String]): Unit = {
     System.setProperty("hadoop.home.dir", "D:/hadoop-2.7.7")
     //判断参数值 如果小于2个则退出程序
