@@ -1,10 +1,9 @@
-package com.Report
+package com.report
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object doAreaBySparkSQL {
-  //todo 处理地域分布
+object doDeviceTypeBySparkSQL {
   def main(args: Array[String]): Unit = {
     //设置hadoop环境变量
     System.setProperty("hadoop.home.dir","D:/hadoop-2.7.7")
@@ -29,25 +28,16 @@ object doAreaBySparkSQL {
     //读取parquet文件
     val df: DataFrame = spark.read.parquet(inputPath)
 
-    df.createOrReplaceTempView("doArea")
-    //todo 按照省市分布，求满足条件的总数(参照计算逻辑编写SQL)
-    /**
-      * 作为条件的日志字段有
-      * requestmode
-      * processnode
-      * iseffective
-      * isbilling
-      * isbid
-      * iswin
-      * adorderid
-      * 特殊的
-      * winprice/1000
-      * adpayment/1000
-      *
-      */
+    df.createOrReplaceTempView("doDeviceType")
+    //todo 按照devicetype分布，求满足条件的总数(参照计算逻辑编写SQL)
     val result=spark.sql(
       """
-        |select provincename,cityname,
+        |select (
+        |case
+        |when devicetype=1 then '手机'
+        |when devicetype=2 then '平板'
+        |else '其他'
+        |end) devicetype,
         |sum(case when requestmode=1 and processnode>=1 then 1 else 0 end) original_requests,
         |sum(case when requestmode=1 and processnode>=2 then 1 else 0 end) effective_requests,
         |sum(case when requestmode=1 and processnode=3 then 1 else 0 end) ad_requests,
@@ -57,14 +47,10 @@ object doAreaBySparkSQL {
         |sum(case when requestmode=3 and iseffective=1 then 1 else 0 end) click_nums,
         |sum(case when iseffective=1 and isbilling=1 and iswin=1 then winprice/1000 else 0 end) dsp_ad_consume,
         |sum(case when iseffective=1 and isbilling=1 and iswin=1 then adpayment/1000 else 0 end) dsp_ad_cost
-        |from doArea
-        |group by provincename,cityname
+        |from doDeviceType
+        |group by devicetype
       """.stripMargin)
     result.show()
-
-    //将数据结果储存
-//    result.write.partitionBy("provincename","cityname").save(outputPath)
     spark.stop()
   }
-
 }

@@ -1,9 +1,9 @@
-package com.Report
+package com.report
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object doDeviceTypeBySparkSQL {
+object doAppBySparkSQL {
   def main(args: Array[String]): Unit = {
     //设置hadoop环境变量
     System.setProperty("hadoop.home.dir","D:/hadoop-2.7.7")
@@ -28,16 +28,11 @@ object doDeviceTypeBySparkSQL {
     //读取parquet文件
     val df: DataFrame = spark.read.parquet(inputPath)
 
-    df.createOrReplaceTempView("doDeviceType")
-    //todo 按照devicetype分布，求满足条件的总数(参照计算逻辑编写SQL)
+    df.createOrReplaceTempView("doApp")
+    //todo 按照appname分布，求满足条件的总数(参照计算逻辑编写SQL)
     val result=spark.sql(
       """
-        |select (
-        |case
-        |when devicetype=1 then '手机'
-        |when devicetype=2 then '平板'
-        |else '其他'
-        |end) devicetype,
+        |select appname,
         |sum(case when requestmode=1 and processnode>=1 then 1 else 0 end) original_requests,
         |sum(case when requestmode=1 and processnode>=2 then 1 else 0 end) effective_requests,
         |sum(case when requestmode=1 and processnode=3 then 1 else 0 end) ad_requests,
@@ -47,10 +42,11 @@ object doDeviceTypeBySparkSQL {
         |sum(case when requestmode=3 and iseffective=1 then 1 else 0 end) click_nums,
         |sum(case when iseffective=1 and isbilling=1 and iswin=1 then winprice/1000 else 0 end) dsp_ad_consume,
         |sum(case when iseffective=1 and isbilling=1 and iswin=1 then adpayment/1000 else 0 end) dsp_ad_cost
-        |from doDeviceType
-        |group by devicetype
+        |from doApp
+        |group by appname
       """.stripMargin)
-    result.show()
+        result.show()
     spark.stop()
   }
+
 }

@@ -1,4 +1,4 @@
-package com.Report
+package com.report
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}

@@ -1,4 +1,4 @@
-package com.Report
+package com.report
 
 import com.util.logUtil
 import org.apache.spark.SparkConf
