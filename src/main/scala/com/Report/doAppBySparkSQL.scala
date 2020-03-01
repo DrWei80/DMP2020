@@ -1,9 +1,9 @@
-package com.business
+package com.Report
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object doIspBySparkSQL {
+object doAppBySparkSQL {
   def main(args: Array[String]): Unit = {
     //设置hadoop环境变量
     System.setProperty("hadoop.home.dir","D:/hadoop-2.7.7")
@@ -28,11 +28,11 @@ object doIspBySparkSQL {
     //读取parquet文件
     val df: DataFrame = spark.read.parquet(inputPath)
 
-    df.createOrReplaceTempView("doIsp")
+    df.createOrReplaceTempView("doApp")
     //todo 按照appname分布，求满足条件的总数(参照计算逻辑编写SQL)
     val result=spark.sql(
       """
-        |select ispname,
+        |select appname,
         |sum(case when requestmode=1 and processnode>=1 then 1 else 0 end) original_requests,
         |sum(case when requestmode=1 and processnode>=2 then 1 else 0 end) effective_requests,
         |sum(case when requestmode=1 and processnode=3 then 1 else 0 end) ad_requests,
@@ -42,10 +42,11 @@ object doIspBySparkSQL {
         |sum(case when requestmode=3 and iseffective=1 then 1 else 0 end) click_nums,
         |sum(case when iseffective=1 and isbilling=1 and iswin=1 then winprice/1000 else 0 end) dsp_ad_consume,
         |sum(case when iseffective=1 and isbilling=1 and iswin=1 then adpayment/1000 else 0 end) dsp_ad_cost
-        |from doIsp
-        |group by ispname
+        |from doApp
+        |group by appname
       """.stripMargin)
-    result.show()
+        result.show()
     spark.stop()
   }
+
 }

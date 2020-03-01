@@ -1,4 +1,4 @@
-package com.business
+package com.Report
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -30,7 +30,7 @@ def main(args: Array[String]): Unit = {
   val df: DataFrame = spark.read.parquet(inputPath)
 
   df.createOrReplaceTempView("doNet")
-  //todo 按照appname分布，求满足条件的总数(参照计算逻辑编写SQL)
+  //todo 按照networkmannername分布，求满足条件的总数(参照计算逻辑编写SQL)
   val result=spark.sql(
     """
       |select networkmannername,
