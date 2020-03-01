@@ -3,11 +3,52 @@ package com.util
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
-
+//专门用于处理该Log的工具类
 object logUtil {
-  //专门用于处理该Log的工具类
 
-  // Rdd转换为RddROW
+  //处理字段并根据计算逻辑返还结果，适用于sparkCore写法
+  def calculateField(x: Row) = {
+    /**
+      *  作为条件的日志字段有
+      *  requestmode
+      *  processnode
+      *  iseffective
+      *  isbilling
+      *  isbid
+      *  iswin
+      *  adorderid
+      *  特殊的
+      *  winprice/1000
+      *  adpayment/1000
+      */
+    //读取字段数据
+    val requestmode = x.getAs[Int]("requestmode")
+    val processnode = x.getAs[Int]("processnode")
+    val iseffective = x.getAs[Int]("iseffective")
+    val isbilling = x.getAs[Int]("isbilling")
+    val isbid = x.getAs[Int]("isbid")
+    val iswin = x.getAs[Int]("iswin")
+    val adorderid = x.getAs[Int]("adorderid")
+    //两个特殊的
+    val winprice = x.getAs[Double]("winprice")
+    val adpayment = x.getAs[Double]("adpayment")
+
+    //根据字段数据返还结果
+    val original_requests=if(requestmode==1 && processnode>=1){1}else{0}
+    val effective_requests=if(requestmode==1 && processnode>=2){1}else{0}
+    val ad_requests=if(requestmode==1 && processnode==3){1}else{0}
+
+    val join_bid=if(iseffective==1 && isbilling==1 && isbid==1){1}else{0}
+    val bid_success=if(iseffective==1 && isbilling==1 && iswin==1 && adorderid!=0){1}else{0}
+    val show_nums=if(requestmode==2 && iseffective==1){1}else{0}
+    val click_nums=if(requestmode==3 && iseffective==1){1}else{0}
+
+    val dsp_ad_consume=if(iseffective==1 && isbilling==1 && iswin==1){winprice/1000}else{0}
+    val dsp_ad_cost=if(iseffective==1 && isbilling==1 && iswin==1){adpayment/1000}else{0}
+    List(original_requests,effective_requests,ad_requests,join_bid,bid_success,show_nums,click_nums,dsp_ad_consume,dsp_ad_cost)
+  }
+
+  // Rdd转换为RddROW 共85个字段
   def rddToRddRowForLog(line: RDD[Array[String]]):  RDD[Row] = {
     val rddRow: RDD[Row] =line.map(arr=>{
       Row(
@@ -100,7 +141,7 @@ object logUtil {
     rddRow
   }
 
-  //定义一个该Log的StructType
+  //定义一个该Log的StructType 共85个字段
   val logStructType=StructType(
     Seq(
       StructField("sessionid",StringType,true),
@@ -190,5 +231,7 @@ object logUtil {
       StructField("mediatype",IntegerType,true)
     )
   )
+
+
 
 }

@@ -51,8 +51,6 @@ object logToParquet {
 
     //todo 将统计的结果输出成 json 格式，并输出到磁盘目录。
 //    saveAsJsonToLocal(countByArea)
-
-
     spark.stop()
 
   }
