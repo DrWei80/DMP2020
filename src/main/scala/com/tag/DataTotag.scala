@@ -1,10 +1,15 @@
 package com.tag
 
-import com.utils.{ReadAppDictionary, TagUtils}
+import com.utils.{JedisUtils, ReadAppDictionary, TagUtils}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import redis.clients.jedis.Jedis
 
 object DataTotag {
+
+
+
+
   def main(args: Array[String]): Unit = {
     //设置hadoop环境变量
     System.setProperty("hadoop.home.dir","D:/hadoop-2.7.7")
@@ -36,6 +41,10 @@ object DataTotag {
     // 广播
     val stopWordBroadCast = spark.sparkContext.broadcast(stopWordMap)
 
+    //todo 获取Jedis连接
+    val jedis: Jedis = JedisUtils.getConnection()
+
+
     //给数据打标签
     df.filter(TagUtils.selectUser).rdd.map(row=>{
       //获取userID
@@ -52,9 +61,25 @@ object DataTotag {
 
       //处理关键字标签
       val keyWordTag=KeyWordTags.makeTag(row,stopWordBroadCast)
-    })
+
+      //处理商圈标签
+      val businessTag=BusinessTag.makeTag(row,jedis)
+
+      // 返回值
+      (userID,adTag++appTag++deviceTag++keyWordTag++businessTag)
+    }).reduceByKey((list1,list2)=>{
+      // 首先变成一个集合 list1(("爱奇艺",1),("优酷",1)):::list2(("爱玩",1),("睡觉",1))
+      // list(("爱奇艺",1),("优酷",1),("爱玩",1),("睡觉",1))
+      (list1:::list2)
+        // 分组 List("爱奇艺",List(("爱奇艺",1),("爱奇艺",1),("爱奇艺",1)))
+        .groupBy(_._1)
+        // 累加每个标签的Value
+        .mapValues(_.foldLeft[Int](0)(_+_._2))
+        .toList
+    }).foreach(println)
 
     spark.stop()
+    jedis.close()
 
   }
 }
