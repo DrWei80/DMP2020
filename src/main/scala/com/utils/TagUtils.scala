@@ -5,6 +5,18 @@ import org.apache.spark.sql.Row
 
 //处理tag的工具类
 object TagUtils {
+  def getAllUserID(row: Row) = {
+    var list =List[String]()
+
+    if(StringUtils.isNotBlank(row.getAs[String]("imei"))) list :+="IM:"+row.getAs[String]("imei")
+    if(StringUtils.isNotBlank(row.getAs[String]("mac"))) list :+="MC:"+row.getAs[String]("mac")
+    if(StringUtils.isNotBlank(row.getAs[String]("idfa"))) list :+="ID:"+row.getAs[String]("idfa")
+    if(StringUtils.isNotBlank(row.getAs[String]("openudid"))) list :+="OID:"+row.getAs[String]("openudid")
+    if(StringUtils.isNotBlank(row.getAs[String]("androidid"))) list :+="AID:"+row.getAs[String]("androidid")
+    list
+  }
+
+
   def getAnyUserID(row: Row) = {
     row match {
       case v if StringUtils.isNotBlank(v.getAs[String]("imei")) => "imei:"+v.getAs[String]("imei")

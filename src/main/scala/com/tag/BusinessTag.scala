@@ -14,7 +14,7 @@ object BusinessTag extends Tags{
   override def makeTag(args: Any*): List[(String, Int)] = {
     var list=List[(String,Int)]()
     val row=args(0).asInstanceOf[Row]
-    val jedis=args(0).asInstanceOf[Jedis]
+    val jedis=args(1).asInstanceOf[Jedis]
 
     /**
       * 中国的经纬度范围大约为：纬度3.86~53.55，经度73.66~135.05
