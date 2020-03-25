@@ -1,7 +1,5 @@
 package com.tag
 
-import java.util.Properties
-
 import com.utils.{JedisUtils, ReadAppDictionary, TagUtils}
 import org.apache.spark.SparkConf
 import org.apache.spark.graphx.{Edge, Graph}
@@ -93,6 +91,7 @@ object DataToTagByGraph {
       // A B C  A->B  A->C
       tp._1.map(uId=>Edge(tp._1.head.hashCode.toLong,uId.hashCode.toLong,0))
     })
+
     // 调用图
     val graph = Graph(point,edges)
     // 调用连通图算法，找到图中的联通分支，

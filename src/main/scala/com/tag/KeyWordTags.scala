@@ -21,7 +21,7 @@ object KeyWordTags extends Tags{
       * 不需要停用词库中的词
       */
     keyWords.filter(x=>{
-      x.length>=3&&x.length<=8&&stopWordMap.value.contains(x)
+      x.length>=3 && x.length<=8 && stopWordMap.value.contains(x)
     })
       .foreach(x=>{
         list:+=("K"+x,1)

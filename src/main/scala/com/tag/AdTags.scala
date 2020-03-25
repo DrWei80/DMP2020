@@ -16,7 +16,6 @@ object AdTags extends Tags{
       */
     val adType=row.getAs[Int]("adspacetype")
     val adName=row.getAs[String]("adspacetypename")
-    //todo sb需求文档就是个屎！
     //根据贴标签的规则返回一个广告标签结果
     adType match {
       case x if x>9 =>list:+=("LC"+x,1)
